@@ -349,72 +349,34 @@ Versão 04 - dispensa leitura de qr-code
 			<h3 class="card-title text-center mb-4">Geração de código de validação</h3>
 			<form id="formCriptografia">
 				<div class="mb-3">
-					<label for="curso" class="form-label">Nome do curso</label> 
-                    <input type="text" id="curso" class="form-control"placeholder="Informe o curso"  />
+					<label for="curso" class="form-label">Nome do curso</label>
+					<input type="text" id="curso" class="form-control" placeholder="Informe o curso" />
 				</div>
 
-	<div id="caixaMensagem" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 9999;">
-		<div style="background: white; padding: 20px; border-radius: 10px; max-width: 400px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">
-			<p id="mensagemTexto" style="margin-bottom: 20px;"></p>
-			<button onclick="fecharCaixaMensagem()" style="padding: 8px 16px; background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer;">OK</button>
-		</div>
-	</div>
+				<div id="caixaMensagem" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 9999;">
+					<div style="background: white; padding: 20px; border-radius: 10px; max-width: 400px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3);">
+						<p id="mensagemTexto" style="margin-bottom: 20px;"></p>
+						<button onclick="fecharCaixaMensagem()" style="padding: 8px 16px; background-color: #007BFF; color: white; border: none; border-radius: 5px; cursor: pointer;">OK</button>
+					</div>
+				</div>
 
-		<div class="input-group">
-			<label for="data_digitada" class="form-label">Data (DD/MM/AAAA)</label>
-			<input type="text" id="data_digitada" class="form-control" inputmode="numeric" pattern="\d{2}/\d{2}/\d{4}" maxlength="10" placeholder="dd/mm/aaaa" required />
-			<button class="btn-limpar" id="limpar_data" onclick="limparData()">Limpar</button>
-		</div>
+				<div class="input-group">
+					<label for="data_digitada" class="form-label">Data (DD/MM/AAAA)</label>
+					<input type="text" id="data_digitada" class="form-control" inputmode="numeric" pattern="\d{2}/\d{2}/\d{4}" maxlength="10" placeholder="dd/mm/aaaa" required />
+					<button class="btn-limpar" id="limpar_data" onclick="limparData()">Limpar</button>
+				</div>
 
+				<div class="input-group">
+					<label for="hora_digitada" class="form-label">Hora (HH:MM:SS)</label>
+					<input type="text" id="hora_digitada" class="form-control" inputmode="numeric" pattern="\d{2}:\d{2}:\d{2}" maxlength="8" placeholder="hh:mm:ss" required />
+					<button class="btn-limpar" id="limpar_hora" onclick="limparHora()">Limpar</button>
+				</div>
 
-		<div class="input-group">
-			<label for="hora_digitada" class="form-label">Hora (HH:MM:SS)</label>
-			<input type="text" id="hora_digitada" class="form-control" inputmode="numeric" pattern="\d{2}:\d{2}:\d{2}" maxlength="8" placeholder="hh:mm:ss" required />
-			<button class="btn-limpar" id="limpar_hora"  onclick="limparHora()">Limpar</button>
-		</div>
-
-	</div>
-
-	<div id="myModal" onclick="fecharModal()">
-		<div class="modal-content" onclick="event.stopPropagation()">
-			<button class="close-btn" onclick="fecharModal()">×</button>
-			<div id="validacao"></div>
-			<button class="btn-ok" onclick="fecharModal()">OK</button>
-		</div>
-	</div>
-
-
-	<script>
-		// Máscara de data: dd/mm/aaaa
-		document.getElementById('data_digitada').addEventListener('input', function(e) {
-			let v = e.target.value.replace(/\D/g, '').slice(0, 8); // Remove não-dígitos e limita a 8
-			if (v.length >= 5) {
-				e.target.value = v.replace(/(\d{2})(\d{2})(\d{1,4})/, '$1/$2/$3');
-			} else if (v.length >= 3) {
-				e.target.value = v.replace(/(\d{2})(\d{1,2})/, '$1/$2');
-			} else {
-				e.target.value = v;
-			}
-		});
-
-		// Máscara de hora: hh:mm:ss
-		document.getElementById('hora_digitada').addEventListener('input', function(e) {
-			let v = e.target.value.replace(/\D/g, '').slice(0, 6); // Máximo 6 dígitos
-			if (v.length >= 5) {
-				e.target.value = v.replace(/(\d{2})(\d{2})(\d{1,2})/, '$1:$2:$3');
-			} else if (v.length >= 3) {
-				e.target.value = v.replace(/(\d{2})(\d{1,2})/, '$1:$2');
-			} else {
-				e.target.value = v;
-			}
-		});
-	</script>
-
-			<div class="d-flex flex-wrap gap-2 mb-4">
-				<button type="button" class="btn btn-primary" onclick="GerarCodValid()">Gerar</button>
-				<button type="button" class="btn btn-secondary" onclick="UpdateDataHora()">Hora Atual</button>
-				<button type="button" class="btn btn-outline-success ms-auto" id="copy_code" onclick="copiarCodigo()">Copiar Código</button>
-			</div>
+				<div class="d-flex flex-wrap gap-2 mb-4">
+					<button type="button" class="btn btn-primary" onclick="GerarCodValid()">Gerar</button>
+					<button type="button" class="btn btn-secondary" onclick="UpdateDataHora()">Hora Atual</button>
+					<button type="button" class="btn btn-outline-success ms-auto" id="copy_code" onclick="copiarCodigo()">Copiar Código</button>
+				</div>
 			</form>
 
 			<div id="error-message-container"></div>
@@ -428,12 +390,7 @@ Versão 04 - dispensa leitura de qr-code
 				<img id="qrImage" src="" style="display: none;" />
 			</div>
 
-            <!-- Botão para baixar o QR Code -->
-            <a id="downloadQrBtn" class="validation-button" style="display:none;" download="qrcode.png">Baixar QR Code</a>
-
-            <div id="github-link-container"></div>
-
-
+			<div id="github-link-container"></div>
 		</div>
 	</div>
 </div>

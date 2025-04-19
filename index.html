@@ -1,967 +1,670 @@
 <!-- 
-Somente data, hora e curso - Gerador de Código 
-Criao por Moisés Lobo D'Almada Alves Pereira 
-moiseslobopvh@gmail.com 
-Versão 05 - dispensa leitura de qr-code 
-Otimizações na lógica e IA. 
---> 
- 
- 
-<!DOCTYPE 
-html> 
-<html lang="pt-BR"> 
-<head> 
-<meta charset="UTF-8" 
-/> 
-<title>Criptografia 
-com QR-CODE</title> 
-<meta name="viewport" 
-content="width=device-width, initial-scale=1.0" /> 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" 
-rel="stylesheet"> 
-<style> 
-:root { 
---cor-primaria: 
-#004d40; 
---cor-secundaria: #ffffff; 
---cor-moises1: #e1eaf2; 
---cor-moises2: #cad4de; 
---cor-moises3: #b6b8bf; 
---cor-moises4: #96989e; 
---cor-acento: #26a69a; 
---cor-erro: #c62828; 
---cor-sucesso: #2e7d32; 
---fundo: #95a6b8; 
-} 
-/* Reset básico e box-sizing */ 
-* { 
-box-sizing: 
-border-box; 
-margin: 0; 
-padding: 0; 
-min-height: auto; /* Garante que a altura mínima seja automática 
-*/ 
-width: 100%; 
-} 
-body { 
-font-family: 
-'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-background-color: 
-var(--fundo); 
-background-image: 
-linear-gradient(to bottom, var(--cor-moises3), var(--cor-moises4)); 
-min-height: 100vh; /* Garante que o body ocupe a altura total 
-da viewport */ 
-width: 100%; 
-padding: 20px; 
-display: flex; 
-justify-content: center; 
-align-items: center; /* Centraliza o conteúdo verticalmente também 
-*/ 
-} 
-.container { 
-background-image: 
-linear-gradient(to bottom, var(--cor-moises1), var(--cor-moises2)); 
-padding: 20px; /* Reduzi o padding para melhor adaptação em telas 
-menores */ 
-border-radius: 15px; 
-min-height: auto; /* Garante que a altura mínima seja automática 
-*/ 
-width: 95%; /* Ocupa 95% da largura do pai em telas menores */ 
-max-width: 600px; /* Largura máxima para telas maiores */ 
-box-shadow: 
-0 4px 10px rgba(240, 232, 128, 0.1); 
-display: flex; 
-flex-direction: 
-column; 
-gap: 15px; /* Espaçamento entre os elementos internos */ 
-} 
-h1 { 
-text-align: center; 
-color: var(--cor-primaria); 
-margin-bottom: 20px; /* Reduzi um pouco a margem */ 
-font-size: 1.8em; /* Ajuste para responsividade */ 
-} 
-label { 
-margin-top: 
-10px; /* Ajustei a margem */ 
-font-weight: 
-bold; 
-color: #333; 
-display: block; 
-font-size: 0.95em; 
-/* Ajuste para responsividade */ 
-} 
-input[type="text"] 
-{ 
-width: 100%; 
-padding: 10px; 
-margin-top: 
-5px; 
-border: 1px 
-solid #ccc; 
-border-radius: 
-8px; 
-font-size: 1em; 
-} 
-.input-group 
-{ 
-display: flex; 
-align-items: center; /* Alinha verticalmente os itens */ 
-gap: 10px; /* Espaçamento entre o input e o botão */ 
-margin-top: 
-10px; 
-} 
-.input-group 
-input[type="text"] { 
-flex-grow: 1; /* O input ocupa o máximo de espaço disponível 
-*/ 
-} 
-.btn-limpar { 
-background-color: #f44336; /* Vermelho suave para indicar ação 
-de limpar */ 
-color: white; 
-border: none; 
-border-radius: 
-5px; 
-padding: 8px 
-12px; 
-font-size: 0.8em; 
-cursor: pointer; 
-transition: 
-background-color 0.3s ease; 
-height: auto; /* Ajusta a altura ao conteúdo */ 
-width: auto; /* Ajusta a largura ao conteúdo */ 
-} 
-.btn-limpar:hover 
-{ 
-background-color: 
-#d32f2f; 
-} 
-.btn-validar-codigo 
-{ 
-background-image: 
-linear-gradient(to bottom, #64b5f6, #42a5f5); /* Tons suaves de azul */ 
-color: white; 
-padding: 10px 
-15px; 
-border: none; 
-border-radius: 
-8px; 
-font-size: 15px; 
-cursor: pointer; 
-transition: background-image 0.3s ease; /* Transição suave do 
-gradiente */ 
-margin-top: 15px; /* Adiciona um pouco de espaço acima do botão 
-validar */ 
-} 
-.btn-validar-codigo:hover { 
-background-image: linear-gradient(to bottom, #42a5f5, #2c80d1); 
-/* Gradiente ligeiramente mais escuro no hover */ 
-} 
-.btn-validar-codigo:active { 
-background-image: linear-gradient(to bottom, #2c80d1, #1e5e99); 
-/* Tom ainda mais escuro ao clicar */ 
-} 
-.valido { 
-background-color: 
-#c8e6c9; 
-color: var(--cor-sucesso); 
-font-weight: 
-bold; 
-padding: 15px; 
-border-radius: 
-8px; 
-white-space: pre-line; 
-text-align: center; /* Centraliza o texto de validação */ 
-font-size: 0.9em; /* Ajuste para responsividade */ 
-} 
-.invalido { 
-background-color: 
-#ffcdd2; 
-color: var(--cor-erro); 
-font-weight: 
-bold; 
-padding: 15px; 
-border-radius: 
-8px; 
-white-space: 
-pre-line; 
-text-align: center; /* Centraliza o texto de invalidação */ 
-font-size: 0.9em; /* Ajuste para responsividade */ 
-} 
-/* Modal overlay 
-*/ 
-#myModal { 
-display: none; 
-position: fixed; 
-top: 0; 
-left: 0; 
-width: 100%; 
-height: 100%; 
-background-color: 
-rgba(0, 0, 0, 0.5); 
-justify-content: 
-center; 
-align-items: 
-center; 
-z-index: 9999; 
-} 
-/* Modal content */ /* Conteúdo interno do modal */ 
-.modal-content 
-{ 
-background-color: 
-#fff; 
-border-radius: 
-12px; 
-padding: 20px; 
-/* Reduzi o padding interno */ 
-width: 90%; 
-max-width: 400px; 
-max-height: 90vh; /* altura máxima do modal */ 
-overflow-y: auto; /* adiciona rolagem vertical se necessário 
-*/ 
-box-shadow: 
-0 8px 20px rgba(0, 0, 0, 0.2); 
-display: flex; 
-flex-direction: 
-column; 
-align-items: 
-center; 
-position: relative; 
-font-family: 
-Arial, sans-serif; 
-animation: fadeIn 
-0.3s ease-in-out; 
-} 
-/* Ícone de informação */ 
-.modal-content::before { 
-content: "ℹ️"; 
-font-size: 30px; /* Reduzi um pouco o tamanho do ícone */ 
-margin-bottom: 10px; 
-} 
-/* Botão de fechar (X) */ 
-.close-btn { 
-position: absolute; 
-top: 10px; 
-right: 10px; 
-background-color: 
-#ff4d4d; 
-color: white; 
-border: none; 
-border-radius: 
-8px; 
-width: 30px; /* Ajustei o tamanho */ 
-height: 30px; /* Ajustei o tamanho */ 
-font-size: 16px; /* Ajustei o tamanho da fonte */ 
-font-weight: 
-bold; 
-cursor: pointer; 
-display: flex; 
-align-items: 
-center; 
-justify-content: 
-center; 
-padding: 0; 
-transition: 
-background-color 0.2s ease; 
-} 
-.close-btn:hover 
-{ 
-background-color: 
-#e60000; 
-} 
-/* Texto dentro do modal */ 
-#validacao { 
-text-align: 
-center; 
-margin: 10px 
-0; 
-font-size: 0.9em; /* Ajuste para responsividade */ 
-color: #333; 
-white-space: pre-line; /* Mantém a formatação do texto */ 
-} 
-/* Botão "OK" */ 
-.btn-ok { 
-background-color: 
-#4CAF50; 
-color: white; 
-border: none; 
-border-radius: 
-6px; 
-padding: 10px 20px; 
-font-size: 0.9em; /* Ajuste para responsividade */ 
-cursor: pointer; 
-margin-top: 
-15px; 
-width: auto; /* Deixa o botão se ajustar ao conteúdo */ 
-} 
-.btn-ok:hover 
-{ 
-background-color: 
-#388e3c; 
-} 
-/* Responsividade para telas menores (celulares) */ 
-@media (max-width: 
-480px) { 
-.container { 
-padding: 15px; 
-border-radius: 
-10px; 
-width: 98%; /* Ocupa ainda mais da largura em telas pequenas 
-*/ 
-margin: 15px auto; 
-gap: 10px; /* Reduzi o espaçamento entre os elementos */ 
-} 
-h1 { 
-font-size: 1.6em; 
-margin-bottom: 
-15px; 
-} 
-label { 
-font-size: 0.9em; 
-margin-top: 
-8px; 
-} 
-input[type="text"] 
-{ 
-font-size: 0.95em; 
-padding: 8px; 
-} 
-.input-group { 
-flex-direction: column; /* Empilha os botões em telas muito pequenas 
-*/ 
-gap: 8px; 
-} 
-.input-group 
-button { 
-font-size: 0.9em; 
-padding: 10px; 
-} 
-.modal-content { 
-width: 95%; /* Modal ocupa mais largura em telas pequenas */ 
-margin-top: 20vh; /* Ajusta a margem superior para centralizar 
-um pouco mais */ 
-padding: 15px; 
-} 
-.close-btn { 
-font-size: 20px; 
-width: 28px; 
-height: 28px; 
-} 
-#validacao { 
-font-size: 0.9em; 
-} 
-.btn-ok { 
-font-size: 0.9em; 
-padding: 8px 
-15px; 
-width: 100%; /* O botão OK ocupa toda a largura no modal em telas 
-pequenas */ 
-} 
-} 
-/* Animação 
-*/ 
-@keyframes fadeIn 
-{ 
-from { 
-opacity: 0; 
-transform: scale(0.95); 
-} 
-to { 
-opacity: 1; 
-transform: scale(1); 
-} 
-} 
-#btn-qr { 
-background-image: 
-linear-gradient(to bottom, #00acc1, #00838f); 
-color: white; 
-border: none; 
-border-radius: 
-8px; 
-padding: 12px 
-20px; 
-font-size: 16px; 
-font-weight: 
-bold; 
-cursor: pointer; 
-box-shadow: 
-0 4px 8px rgba(0,0,0,0.2); 
-transition: 
-background 0.3s ease, transform 0.2s ease; 
-display: flex; 
-align-items: 
-center; 
-justify-content: 
-center; 
-gap: 10px; 
-} 
-#btn-qr:hover 
-{ 
-background-image: 
-linear-gradient(to bottom, #00838f, #006064); 
-transform: scale(1.03); 
-} 
- 
-</style> 
-</head> 
-<body class="bg-light"> 
- 
-<div 
-class="container py-5"> 
- <div class="card shadow-lg"> 
- <div 
-class="card-body"> 
- <h2 
-class="card-title text-center mb-4">Instituto Estadual de Educação 
-em Saúde Pública de Rondônia (Iespro)</h3> 
- <h3 
-class="card-title text-center mb-4">Geração de código de 
-validação</h3> 
- <form id="formCriptografia"> 
- 
-<div class="mb-3"> 
-<label for="curso" class="form-label">Nome 
-do curso</label> 
- <input type="text" id="curso" 
-class="form-control"placeholder="Informe o curso" /> 
-</div> 
-<div id="caixaMensagem" 
-style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 
-100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; 
-z-index: 9999;"> 
-<div style="background: 
-white; padding: 20px; border-radius: 10px; max-width: 400px; text-align: center; 
-box-shadow: 0 2px 10px rgba(0,0,0,0.3);"> 
-<p id="mensagemTexto" 
-style="margin-bottom: 20px;"></p> 
-<button onclick="fecharCaixaMensagem()" 
-style="padding: 8px 16px; background-color: #007BFF; color: white; border: 
-none; border-radius: 5px; cursor: pointer;">OK</button> 
-</div> 
-</div> 
- 
-<div 
-class="input-group"> 
- <label for="data_digitada" 
-class="form-label">Data (DD/MM/AAAA)</label> 
- <input type="text" 
-id="data_digitada" class="form-control" 
-inputmode="numeric" pattern="\d{2}/\d{2}/\d{4}" 
-maxlength="10" placeholder="dd/mm/aaaa" required /> 
- <button class="btn-limpar" 
-id="limparDataBtn" 
-onclick="limparData()">Limpar</button> 
-</div> 
- 
-<div 
-class="input-group"> 
- <label 
-for="hora_digitada" class="form-label">Hora 
-(HH:MM:SS)</label> 
- <input type="text" 
-id="hora_digitada" class="form-control" 
-inputmode="numeric" pattern="\d{2}:\d{2}:\d{2}" 
-maxlength="8" placeholder="hh:mm:ss" required /> 
- <button class="btn-limpar" 
-id="limparHoraBtn" 
-onclick="limparHora()">Limpar</button> 
-</div> 
- 
-</div> 
-<div id="myModal" 
-onclick="fecharModal()"> 
-<div class="modal-content" 
-onclick="event.stopPropagation()"> 
-<button class="close-btn" 
-onclick="fecharModal()">X</button> 
-<div id="validacao"></div> 
-<button class="btn-ok" 
-onclick="fecharModal()">OK</button> 
-</div> 
-</div> 
-<script> 
- 
-// Máscara de data: dd/mm/aaaa 
-document.getElementById('data_digitada').addEventListener('input', 
-function(e) { 
-let v = e.target.value.replace(/\D/g, '').slice(0, 8); // Remove 
-não-dígitos e limita a 8 
-if (v.length 
->= 5) { 
-e.target.value 
-= v.replace(/(\d{2})(\d{2})(\d{1,4})/, '$1/$2/$3'); 
-} else if (v.length 
->= 3) { 
-e.target.value 
-= v.replace(/(\d{2})(\d{1,2})/, '$1/$2'); 
-} else { 
-e.target.value 
-= v; 
-} 
-}); 
-// Máscara de hora: hh:mm:ss 
-document.getElementById('hora_digitada').addEventListener('input', 
-function(e) { 
-let v = e.target.value.replace(/\D/g, '').slice(0, 6); // Máximo 
-6 dígitos 
-if (v.length 
->= 5) { 
-e.target.value 
-= v.replace(/(\d{2})(\d{2})(\d{1,2})/, '$1:$2:$3'); 
-} else if (v.length 
->= 3) { 
-e.target.value 
-= v.replace(/(\d{2})(\d{1,2})/, '$1:$2'); 
-} else { 
-e.target.value 
-= v; 
-} 
-}); 
-</script> 
-<div class="d-flex 
-flex-wrap gap-2 mb-4"> 
-<button type="button" 
-class="btn btn-primary" onclick="GerarCodValid()">Gerar</button> 
-<button type="button" 
-class="btn btn-secondary" onclick="UpdateDataHora()">Hora 
-Atual</button> 
-<button type="button" 
-class="btn btn-outline-success ms-auto" id="copy_code" onclick="copiarCodigo()">Copiar 
-Código</button> 
-</div> 
-</form> 
-<div id="error-message-container"></div> 
-<div id="resultado-container" 
-class="mt-4 text-center"> 
-<h5 class="fw-bold">QR-Code para Validação:</h5> 
-<div id="codigo-validacao">Clique em "Gerar" 
-para obter o código.</div> 
-</div> 
-<div id="qrcode"> 
-<img id="qrImage" 
-src="" style="display: none;" /> 
-</div> 
- <div id="github-link-container"></div> 
-</div> 
-</div> 
-</div> 
-<textarea 
-id="clipboard-area" style="position:absolute; left:-9999px;"></textarea> 
-<div class="position-fixed 
-bottom-0 end-0 p-3" style="z-index: 9999"> 
-<div id="toast-copiado" 
-class="toast align-items-center text-white bg-success border-0" role="alert" 
-aria-live="assertive" aria-atomic="true"> 
-<div class="d-flex"> 
-<div class="toast-body">Código 
-copiado com sucesso!</div> 
-<button type="button" 
-class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button> 
-</div> 
-</div> 
-</div> 
- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> 
- 
- <script> 
- const base62chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'; 
- const limite_caracteres_curso = 50; 
- let ja_gerou_qrcode = false; 
- document.getElementById("curso").maxLength 
-= limite_caracteres_curso; 
- 
- function aplicarMascaraDataHora() 
-{ 
- const dataInput = document.getElementById('data_digitada'); 
- const horaInput = document.getElementById('hora_digitada'); 
- 
- dataInput.addEventListener('input', () => { 
- let valor = dataInput.value.replace(/\D/g, ''); 
- if (valor.length >= 3 && valor.length 
-<= 4) 
- valor = valor.slice(0, 2) + '/' + valor.slice(2); 
- else if (valor.length 
-> 4) 
- valor = valor.slice(0, 
-2) + '/' + valor.slice(2, 4) + '/' + valor.slice(4, 8); 
- dataInput.value = valor; 
- }); 
- 
- horaInput.addEventListener('input', () => { 
- let valor = horaInput.value.replace(/\D/g, ''); 
- if (valor.length >= 3 && valor.length 
-<= 4) 
- valor = valor.slice(0, 2) + ':' + valor.slice(2); 
- else if (valor.length 
-> 4) 
- valor = valor.slice(0, 
-2) + ':' + valor.slice(2, 4) + ':' + valor.slice(4, 6); 
- horaInput.value = valor; 
- }); 
- } 
- 
- 
- 
- function toBase62(num) 
-{ //início da função toBase62 
- if (num === 0) return '0'; 
- let base62 = ''; 
- while (num > 0) { 
- base62 = base62chars[num 
-% 62] + base62; 
- num = Math.floor(num / 
-62); 
- } 
- return base62; 
- } 
- 
- 
- function completarComEspacos(texto, 
-tam) { 
- return texto.padEnd(tam, ' '); 
- } 
- 
- function randomize(range) { 
- return Math.floor(Math.random() * range); 
- } 
- 
- function toChar(num) { 
- return String.fromCharCode(num); 
- } 
- 
- function CompletarComEspaco(texto, qtd) { 
- return texto.padEnd(qtd, ' '); 
- } 
- function CompletarComZero_inicio(texto, 
-qtd) { 
- return texto.padStart(qtd, '0'); 
- } 
- function CompletarComCaractere(texto, 
-qtd) { 
- const tam_texto = texto.length; 
- const faltam = qtd - tam_texto; 
- 
- if (faltam < 0) { 
- return texto; 
- } else { 
- let complemento = ''; 
- for (let i = 0; i < faltam; i++) { 
- const charCode = 65 + randomize(26); 
- complemento += String.fromCharCode(charCode); // 
-Converte para caractere 
- } 
- return texto + complemento; 
- } 
- } 
- 
- function toCharCodesBase62(texto) { 
- let resultado = ''; 
- for (let i = 0; i < texto.length; i++) { 
- const code = texto.charCodeAt(i); 
- resultado += toBase62(code).padStart(2, 
-'0'); 
- resultado += toBase62(code 
-+ 1).padStart(2, '0'); 
- } 
- 
- return resultado; 
- } 
- 
-function 
-preencherDataHora(gerar) { 
- const agora = new Date(); 
- const dia = 
-String(agora.getDate()).padStart(2, '0'); 
- const mes = String(agora.getMonth() + 
-1).padStart(2, '0'); 
- const ano = agora.getFullYear(); 
- const horaAtual = 
-String(agora.getHours()).padStart(2, '0'); 
- const minuto = 
-String(agora.getMinutes()).padStart(2, '0'); 
- const segundo = 
-String(agora.getSeconds()).padStart(2, '0'); 
- 
- document.getElementById('data_digitada').value = `${dia}/${mes}/${ano}`; 
- document.getElementById('hora_digitada').value 
-= `${horaAtual}:${minuto}:${segundo}`; 
- 
- if (gerar === true 
-&& ja_gerou_qrcode===true) { 
- const curso = 
-document.getElementById("curso").value.trim(); 
- const data = 
-document.getElementById("data_digitada").value.trim(); 
- const hora = 
-document.getElementById("hora_digitada").value.trim(); 
- 
- // Verifica se 
-todos os campos têm algum valor após remover espaços em branco 
- if (curso.length > 0 && data.length 
-> 0 && hora.length > 0) { 
- GerarCodValid(); 
- } 
- } 
-} 
- function UpdateDataHora(){ 
- const curso = 
-document.getElementById("curso").value.trim(); 
- preencherDataHora(!(!curso)); 
- } 
- 
- function displayErrorMessage(message) { 
- document.getElementById('error-message-container').innerHTML 
-= `<div class="alert alert-danger d-flex align-items-center" role="alert"> 
- <span class="me-2">⚠️</span> ${message} 
- </div>`; 
- } 
- 
- 
- function atualizarBotaoDownload() { 
- const qrImage = document.getElementById('qrImage'); 
- const downloadBtn = document.getElementById('downloadQrBtn'); 
- 
- if (qrImage.src && qrImage.style.display 
-!== 'none') { 
- downloadBtn.href = qrImage.src; 
- downloadBtn.style.display = 'block'; 
- } else { 
- downloadBtn.style.display = 'none'; 
- } 
- } 
- 
- 
- function GerarCodValid() { 
- const curso = 
-document.getElementById("curso").value.trim(); 
- const data 
-= document.getElementById("data_digitada").value.trim(); 
- const hora 
-= document.getElementById("hora_digitada").value.trim(); 
- const 
-validacao = document.getElementById("validacao"); 
- 
- const dataPattern = 
-/^\d{2}\/\d{2}\/\d{4}$/; 
- const horaPattern = 
-/^\d{2}:\d{2}:\d{2}$/; 
- 
- if (!curso || !data || !hora) { 
- validacao.className 
-= "invalido"; 
- // 
-Verifica se todos os campos têm algum valor após remover espaços em branco 
- let info = ""; 
- if (curso.length === 0) { 
- info = "Informe o 
-nome do curso."; 
- } 
- else if (data.length === 0) { 
- info = "Informe a data 
-do curso."; 
- } 
- else if (hora.length === 0) { 
- info = "Informe a 
-hora do curso."; 
- } 
- validacao.innerText = "❌ " + info; 
- abrirModal(); 
- return; 
- } 
- 
- if (!dataPattern.test(data)) { 
- displayErrorMessage('Formato 
-de data inválido. Use 
-DD/MM/AAAA.'); 
- return; 
- } 
- 
- if (!horaPattern.test(hora)) { 
- displayErrorMessage('Formato 
-de hora inválido. Use 
-HH:MM:SS.'); 
- return; 
- } 
- 
- const [dia, mes, ano] = 
-data.split('/').map(Number); 
- const [hh, mm, ss] = 
-hora.split(':').map(Number); 
- 
- const encData = 
-CompletarComZero_inicio(toBase62(ano * 32 * 32 + mes * 32 + dia), 5); 
- const 
-encHora = CompletarComZero_inicio(toBase62(hh * 60 * 60 + mm * 60 + ss), 5); 
- 
- const 
-len_curso = curso.length + 100; // Calcula o comprimento da string curso 
- 
- const string_len_curso = 
-String(len_curso); 
- const cursoBase62 = 
-toCharCodesBase62(CompletarComCaractere(curso, limite_caracteres_curso)); 
- //const 
-codigoFinal = 
-`${encData}.${encHora}.${cursoBase62}${alunoBase62}.${string_len_curso}.${string_len_aluno}`; 
- const 
-codigoFinal = 
-`${encData}.${encHora}.${cursoBase62}.${string_len_curso}.${limite_caracteres_curso}`; 
-//só o curso, sem o aluno 
- 
- let site_alvo = 
-"https://advancedsystemsprogrammingia.github.io/iespro-valid-curso-auto/"; 
- let conecta = 
-"?id="; 
- let 
-gera_html = site_alvo + conecta + codigoFinal; 
- ja_gerou_qrcode = true; 
- MostrarElemento(false); //função que oculta o campo 
- document.getElementById('clipboard-area').value 
-= gera_html; 
- 
- const qrImage = 
-document.getElementById('qrImage'); 
- qrImage.src = 
-'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' 
- + encodeURIComponent(gera_html) 
- + 
-'&color=000001&bgcolor=FFFFFF'; //cor do qrcode para download 
- qrImage.style.display = 'block'; 
- 
- MostrarElemento(true, 
-"copy_code"); 
- 
- GerarLinkparaValidacao(); 
- 
- atualizarBotaoDownload(); //FUNÇÃO QUE CHAMA O BOTÃO DOWNLOAD. O BOTÃO 
-SÓ DEVE APARECER APÓS GERAR O CÓDIGO QR-CODE 
- } 
- 
- 
- function copiarCodigo() { 
- const area = document.getElementById('clipboard-area'); 
- area.select(); 
- document.execCommand('copy'); 
- 
- const toastElement = document.getElementById('toast-copiado'); 
- const toast = new bootstrap.Toast(toastElement); 
- toast.show(); 
- } 
- function MostrarElemento(exibir, elementoId) { 
- const elemento = document.getElementById(elementoId); 
- if (elemento) { 
- elemento.style.display = exibir ? "block" 
-: "none"; 
- } 
- } 
- 
- //Limpar mensagem de erro 
-"Informe o curso" 
- function clearErrorMessage(elementoId) { 
- const elemento = document.getElementById(elementoId); 
- if (elemento) { 
- elemento.innerHTML = ''; 
- } else { 
- console.error(`Elemento 
-com o ID "${elementoId}" não encontrado.`); 
- } 
- } 
- 
-function limparData() { 
-document.getElementById("data_digitada").value = ""; 
-} 
-function limparHora() { 
-document.getElementById("hora_digitada").value = ""; 
-} 
-function abrirModal() 
-{ 
-const modal 
-= document.getElementById("myModal"); 
-modal.style.display 
-= "flex"; 
-} 
-function fecharModal() 
-{ 
-const modal 
-= document.getElementById("myModal"); 
-modal.style.display 
-= "none"; 
-} 
-function exibirCaixaMensagem(mensagem) { 
-const caixa = document.getElementById("caixaMensagem"); 
-const texto = document.getElementById("mensagemTexto"); 
-texto.innerText = mensagem; 
-caixa.style.display = "flex"; 
-} 
-function fecharCaixaMensagem() { 
-const caixa = document.getElementById("caixaMensagem"); 
-caixa.style.display 
-= "none"; 
-} 
- 
- function GerarLinkparaValidacao() { 
- const container = document.getElementById("github-link-container"); 
- 
- // Cria o HTML do link com estilo moderno 
- container.innerHTML = ` 
- <div style=" 
- background-color: #f5f5f5; 
- border-radius: 12px; 
- padding: 16px; 
- margin-top: 10px; 
- text-align: center; 
- box-shadow: 0 4px 8px rgba(0,0,0,0.1); 
- max-width: 400px; 
- margin-left: auto; 
- margin-right: auto; 
- "> 
- <a href="https://iesprosystems.github.io/validcertifdocursoiespro/" 
-target="_blank" style=" 
- text-decoration: none; 
- font-weight: bold; 
- font-size: 16px; 
- color: #ffffff; 
- background-color: #007bff; 
- padding: 10px 20px; 
- border-radius: 8px; 
- display: inline-block; 
- transition: background-color 0.3s; 
- " onmouseover="this.style.backgroundColor='#0056b3'" 
-onmouseout="this.style.backgroundColor='#007bff'"> 
- 🔗 Acessar Validador de Certificados 
- </a> 
- </div> 
- `; 
- } 
- 
- function Colorir_Botao(id_botao, cor) { 
- const botao = 
-document.getElementById(id_botao); 
- if (botao) { 
- botao.style.backgroundColor = cor; 
- } else { 
- console.error(`Botão com o 
-ID "${id_botao}" não encontrado.`); 
- } 
- } 
- 
- window.onload = function () { 
- preencherDataHora(false); 
- MostrarElemento(false, 
-"error-message-container"); 
- MostrarElemento(false, "codigo-validacao"); 
- MostrarElemento(false, "copy_code"); 
- clearErrorMessage("codigo-validacao"); 
- clearErrorMessage("error-message-container"); 
- aplicarMascaraDataHora(); 
- let cor = 
-"#8a6e69"; 
- Colorir_Botao("limparDataBtn", cor); 
- Colorir_Botao("limparHoraBtn", cor); 
- 
- }; 
- </script> 
-</body> 
-</html>
+Somente data, hora e curso - Gerador de Código
+Criao por Moisés Lobo D'Almada Alves Pereira
+moiseslobopvh@gmail.com
+Versão 05 - dispensa leitura de qr-code
+Otimizações na lógica e IA.
+-->
 
+
+<!DOCTYPE	html>
+<html	lang="pt-BR">
+<head>
+<meta	charset="UTF-8"	/>
+<title>Criptografia	com	QR-CODE</title>
+<meta	name="viewport"	content="width=device-width,	initial-scale=1.0"	/>
+<link	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"	rel="stylesheet">
+<style>
+:root	{
+--cor-primaria:	#004d40;
+--cor-secundaria:	#ffffff;
+--cor-moises1:	#e1eaf2;
+--cor-moises2:	#cad4de;
+--cor-moises3:	#b6b8bf;
+--cor-moises4:	#96989e;
+--cor-acento:	#26a69a;
+--cor-erro:	#c62828;
+--cor-sucesso:	#2e7d32;
+--fundo:	#95a6b8;
+}
+/*	Reset	básico	e	box-sizing	*/
+*	{
+box-sizing:	border-box;
+margin:	0;
+padding:	0;
+min-height:	auto;	/*	Garante	que	a	altura	mínima	seja	automática	*/
+width:	100%;
+}
+body	{
+font-family:	'Segoe	UI',	Tahoma,	Geneva,	Verdana,	sans-serif;
+background-color:	var(--fundo);
+background-image:	linear-gradient(to	bottom,	var(--cor-moises3),	var(--cor-moises4));
+min-height:	100vh;	/*	Garante	que	o	body	ocupe	a	altura	total	da	viewport	*/
+width:	100%;
+padding:	20px;
+display:	flex;
+justify-content:	center;
+align-items:	center;	/*	Centraliza	o	conteúdo	verticalmente	também	*/
+}
+.container	{
+background-image:	linear-gradient(to	bottom,	var(--cor-moises1),	var(--cor-moises2));
+padding:	20px;	/*	Reduzi	o	padding	para	melhor	adaptação	em	telas	menores	*/
+border-radius:	15px;
+min-height:	auto;	/*	Garante	que	a	altura	mínima	seja	automática	*/
+width:	95%;	/*	Ocupa	95%	da	largura	do	pai	em	telas	menores	*/
+max-width:	600px;	/*	Largura	máxima	para	telas	maiores	*/
+box-shadow:	0	4px	10px	rgba(240,	232,	128,	0.1);
+display:	flex;
+flex-direction:	column;
+gap:	15px;	/*	Espaçamento	entre	os	elementos	internos	*/
+}
+h1	{
+text-align:	center;
+color:	var(--cor-primaria);
+margin-bottom:	20px;	/*	Reduzi	um	pouco	a	margem	*/
+font-size:	1.8em;	/*	Ajuste	para	responsividade	*/
+}
+label	{
+margin-top:	10px;	/*	Ajustei	a	margem	*/
+font-weight:	bold;
+color:	#333;
+display:	block;
+font-size:	0.95em;	/*	Ajuste	para	responsividade	*/
+}
+input[type="text"]	{
+width:	100%;
+padding:	10px;
+margin-top:	5px;
+border:	1px	solid	#ccc;
+border-radius:	8px;
+font-size:	1em;
+}
+.input-group	{
+display:	flex;
+align-items:	center;	/*	Alinha	verticalmente	os	itens	*/
+gap:	10px;	/*	Espaçamento	entre	o	input	e	o	botão	*/
+margin-top:	10px;
+}
+.input-group	input[type="text"]	{
+flex-grow:	1;	/*	O	input	ocupa	o	máximo	de	espaço	disponível	*/
+}
+.btn-limpar	{
+background-color:	#f44336;	/*	Vermelho	suave	para	indicar	ação	de	limpar	*/
+color:	white;
+border:	none;
+border-radius:	5px;
+padding:	8px	12px;
+font-size:	0.8em;
+cursor:	pointer;
+transition:	background-color	0.3s	ease;
+height:	auto;	/*	Ajusta	a	altura	ao	conteúdo	*/
+width:	auto;	/*	Ajusta	a	largura	ao	conteúdo	*/
+}
+.btn-limpar:hover	{
+background-color:	#d32f2f;
+}
+.btn-validar-codigo	{
+background-image:	linear-gradient(to	bottom,	#64b5f6,	#42a5f5);	/*	Tons	suaves	de	azul	*/
+color:	white;
+padding:	10px	15px;
+border:	none;
+border-radius:	8px;
+font-size:	15px;
+cursor:	pointer;
+transition:	background-image	0.3s	ease;	/*	Transição	suave	do	gradiente	*/
+margin-top:	15px;	/*	Adiciona	um	pouco	de	espaço	acima	do	botão	validar	*/
+}
+.btn-validar-codigo:hover	{
+background-image:	linear-gradient(to	bottom,	#42a5f5,	#2c80d1);	/*	Gradiente	ligeiramente	mais	escuro	no	hover	*/
+}
+.btn-validar-codigo:active	{
+background-image:	linear-gradient(to	bottom,	#2c80d1,	#1e5e99);	/*	Tom	ainda	mais	escuro	ao	clicar	*/
+}
+.valido	{
+background-color:	#c8e6c9;
+color:	var(--cor-sucesso);
+font-weight:	bold;
+padding:	15px;
+border-radius:	8px;
+white-space:	pre-line;
+text-align:	center;	/*	Centraliza	o	texto	de	validação	*/
+font-size:	0.9em;	/*	Ajuste	para	responsividade	*/
+}
+.invalido	{
+background-color:	#ffcdd2;
+color:	var(--cor-erro);
+font-weight:	bold;
+padding:	15px;
+border-radius:	8px;
+white-space:	pre-line;
+text-align:	center;	/*	Centraliza	o	texto	de	invalidação	*/
+font-size:	0.9em;	/*	Ajuste	para	responsividade	*/
+}
+/*	Modal	overlay	*/
+#myModal	{
+display:	none;
+position:	fixed;
+top:	0;
+left:	0;
+width:	100%;
+height:	100%;
+background-color:	rgba(0,	0,	0,	0.5);
+justify-content:	center;
+align-items:	center;
+z-index:	9999;
+}
+/*	Modal	content	*/	/*	Conteúdo	interno	do	modal	*/
+.modal-content	{
+background-color:	#fff;
+border-radius:	12px;
+padding:	20px;	/*	Reduzi	o	padding	interno	*/
+width:	90%;
+max-width:	400px;
+max-height:	90vh;	/*	altura	máxima	do	modal	*/
+overflow-y:	auto;	/*	adiciona	rolagem	vertical	se	necessário	*/
+box-shadow:	0	8px	20px	rgba(0,	0,	0,	0.2);
+display:	flex;
+flex-direction:	column;
+align-items:	center;
+position:	relative;
+font-family:	Arial,	sans-serif;
+animation:	fadeIn	0.3s	ease-in-out;
+}
+/*	Ícone	de	informação	*/
+.modal-content::before	{
+content:	"ℹ️";
+font-size:	30px;	/*	Reduzi	um	pouco	o	tamanho	do	ícone	*/
+margin-bottom:	10px;
+}
+/*	Botão	de	fechar	(X)	*/
+.close-btn	{
+position:	absolute;
+top:	10px;
+right:	10px;
+background-color:	#ff4d4d;
+color:	white;
+border:	none;
+border-radius:	8px;
+width:	30px;	/*	Ajustei	o	tamanho	*/
+height:	30px;	/*	Ajustei	o	tamanho	*/
+font-size:	16px;	/*	Ajustei	o	tamanho	da	fonte	*/
+font-weight:	bold;
+cursor:	pointer;
+display:	flex;
+align-items:	center;
+justify-content:	center;
+padding:	0;
+transition:	background-color	0.2s	ease;
+}
+.close-btn:hover	{
+background-color:	#e60000;
+}
+/*	Texto	dentro	do	modal	*/
+#validacao	{
+text-align:	center;
+margin:	10px	0;
+font-size:	0.9em;	/*	Ajuste	para	responsividade	*/
+color:	#333;
+white-space:	pre-line;	/*	Mantém	a	formatação	do	texto	*/
+}
+/*	Botão	"OK"	*/
+.btn-ok	{
+background-color:	#4CAF50;
+color:	white;
+border:	none;
+border-radius:	6px;
+padding:	10px	20px;
+font-size:	0.9em;	/*	Ajuste	para	responsividade	*/
+cursor:	pointer;
+margin-top:	15px;
+width:	auto;	/*	Deixa	o	botão	se	ajustar	ao	conteúdo	*/
+}
+.btn-ok:hover	{
+background-color:	#388e3c;
+}
+/*	Responsividade	para	telas	menores	(celulares)	*/
+@media	(max-width:	480px)	{
+.container	{
+padding:	15px;
+border-radius:	10px;
+width:	98%;	/*	Ocupa	ainda	mais	da	largura	em	telas	pequenas	*/
+margin:	15px	auto;
+gap:	10px;	/*	Reduzi	o	espaçamento	entre	os	elementos	*/
+}
+h1	{
+font-size:	1.6em;
+margin-bottom:	15px;
+}
+label	{
+font-size:	0.9em;
+margin-top:	8px;
+}
+input[type="text"]	{
+font-size:	0.95em;
+padding:	8px;
+}
+.input-group	{
+flex-direction:	column;	/*	Empilha	os	botões	em	telas	muito	pequenas	*/
+gap:	8px;
+}
+.input-group	button	{
+font-size:	0.9em;
+padding:	10px;
+}
+.modal-content	{
+width:	95%;	/*	Modal	ocupa	mais	largura	em	telas	pequenas	*/
+margin-top:	20vh;	/*	Ajusta	a	margem	superior	para	centralizar	um	pouco	mais	*/
+padding:	15px;
+}
+.close-btn	{
+font-size:	20px;
+width:	28px;
+height:	28px;
+}
+#validacao	{
+font-size:	0.9em;
+}
+.btn-ok	{
+font-size:	0.9em;
+padding:	8px	15px;
+width:	100%;	/*	O	botão	OK	ocupa	toda	a	largura	no	modal	em	telas	pequenas	*/
+}
+}
+/*	Animação	*/
+@keyframes	fadeIn	{
+from	{
+opacity:	0;
+transform:	scale(0.95);
+}
+to	{
+opacity:	1;
+transform:	scale(1);
+}
+}
+#btn-qr	{
+background-image:	linear-gradient(to	bottom,	#00acc1,	#00838f);
+color:	white;
+border:	none;
+border-radius:	8px;
+padding:	12px	20px;
+font-size:	16px;
+font-weight:	bold;
+cursor:	pointer;
+box-shadow:	0	4px	8px	rgba(0,0,0,0.2);
+transition:	background	0.3s	ease,	transform	0.2s	ease;
+display:	flex;
+align-items:	center;
+justify-content:	center;
+gap:	10px;
+}
+#btn-qr:hover	{
+background-image:	linear-gradient(to	bottom,	#00838f,	#006064);
+transform:	scale(1.03);
+}
+
+</style>
+</head>
+<body	class="bg-light">
+
+<div class="container py-5">
+	<div class="card shadow-lg">
+		<div class="card-body">
+			<h2 class="card-title text-center mb-4">Instituto Estadual de Educação em Saúde Pública de Rondônia (Iespro)</h3>
+			<h3 class="card-title text-center mb-4">Geração de código de validação</h3>
+			<form id="formCriptografia">
+			    
+<div	class="mb-3">
+<label	for="curso"	class="form-label">Nome	do	curso</label>	
+	<input	type="text"	id="curso"	class="form-control"placeholder="Informe o curso"	/>
+</div>
+<div	id="caixaMensagem"	style="display:	none;	position:	fixed;	top:	0;	left:	0;	width:	100%;	height:	100%;	background-color:	rgba(0,0,0,0.5);	justify-content:	center;	align-items:	center;	z-index:	9999;">
+<div	style="background:	white;	padding:	20px;	border-radius:	10px;	max-width:	400px;	text-align:	center;	box-shadow:	0	2px	10px	rgba(0,0,0,0.3);">
+<p	id="mensagemTexto"	style="margin-bottom:	20px;"></p>
+<button	onclick="fecharCaixaMensagem()"	style="padding:	8px	16px;	background-color:	#007BFF;	color:	white;	border:	none;	border-radius:	5px;	cursor:	pointer;">OK</button>
+</div>
+</div>
+
+<div class="input-group">
+    <label for="data_digitada" class="form-label">Data (DD/MM/AAAA)</label>
+    <input type="text" id="data_digitada" class="form-control" inputmode="numeric" pattern="\d{2}/\d{2}/\d{4}" maxlength="10" placeholder="dd/mm/aaaa" required />
+    <button class="btn-limpar" id="limparDataBtn" onclick="limparData()">Limpar</button>
+</div>
+
+<div class="input-group">
+    <label for="hora_digitada" class="form-label">Hora (HH:MM:SS)</label>
+    <input type="text" id="hora_digitada" class="form-control" inputmode="numeric" pattern="\d{2}:\d{2}:\d{2}" maxlength="8" placeholder="hh:mm:ss" required />
+    <button class="btn-limpar" id="limparHoraBtn" onclick="limparHora()">Limpar</button>
+</div>
+
+</div>
+<div	id="myModal"	onclick="fecharModal()">
+<div	class="modal-content"	onclick="event.stopPropagation()">
+<button	class="close-btn"	onclick="fecharModal()">X</button>
+<div	id="validacao"></div>
+<button	class="btn-ok"	onclick="fecharModal()">OK</button>
+</div>
+</div>
+<script>
+
+//	Máscara	de	data:	dd/mm/aaaa
+document.getElementById('data_digitada').addEventListener('input',	function(e)	{
+let	v	=	e.target.value.replace(/\D/g,	'').slice(0,	8);	//	Remove	não-dígitos	e	limita	a	8
+if	(v.length	>=	5)	{
+e.target.value	=	v.replace(/(\d{2})(\d{2})(\d{1,4})/,	'$1/$2/$3');
+}	else	if	(v.length	>=	3)	{
+e.target.value	=	v.replace(/(\d{2})(\d{1,2})/,	'$1/$2');
+}	else	{
+e.target.value	=	v;
+}
+});
+//	Máscara	de	hora:	hh:mm:ss
+document.getElementById('hora_digitada').addEventListener('input',	function(e)	{
+let	v	=	e.target.value.replace(/\D/g,	'').slice(0,	6);	//	Máximo	6	dígitos
+if	(v.length	>=	5)	{
+e.target.value	=	v.replace(/(\d{2})(\d{2})(\d{1,2})/,	'$1:$2:$3');
+}	else	if	(v.length	>=	3)	{
+e.target.value	=	v.replace(/(\d{2})(\d{1,2})/,	'$1:$2');
+}	else	{
+e.target.value	=	v;
+}
+});
+</script>
+<div	class="d-flex	flex-wrap	gap-2	mb-4">
+<button	type="button"	class="btn	btn-primary"	onclick="GerarCodValid()">Gerar</button>
+<button	type="button"	class="btn	btn-secondary"	onclick="UpdateDataHora()">Hora Atual</button>
+<button	type="button"	class="btn	btn-outline-success	ms-auto"	id="copy_code"	onclick="copiarCodigo()">Copiar	Código</button>
+</div>
+</form>
+<div	id="error-message-container"></div>
+<div	id="resultado-container"	class="mt-4	text-center">
+<h5	class="fw-bold">QR-Code	para	Validação:</h5>
+<div	id="codigo-validacao">Clique	em	"Gerar"	para	obter	o	código.</div>
+</div>
+<div	id="qrcode">
+<img	id="qrImage"	src=""	style="display:	none;"	/>
+</div>
+	<!--	Botão	para	baixar	o	QR	Code	-->
+	<a	id="downloadQrBtn"	class="validation-button"	style="display:none;"	download="qrcode.png">Baixar	QR	Code</a>
+	<div	id="github-link-container"></div>
+</div>
+</div>
+</div>
+<textarea	id="clipboard-area"	style="position:absolute;	left:-9999px;"></textarea>
+<div	class="position-fixed	bottom-0	end-0	p-3"	style="z-index:	9999">
+<div	id="toast-copiado"	class="toast	align-items-center	text-white	bg-success	border-0"	role="alert"	aria-live="assertive"	aria-atomic="true">
+<div	class="d-flex">
+<div	class="toast-body">Código	copiado	com	sucesso!</div>
+<button	type="button"	class="btn-close	btn-close-white	me-2	m-auto"	data-bs-dismiss="toast"></button>
+</div>
+</div>
+</div>
+	<script	src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	
+	<script>
+	const	base62chars	=	'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+	const	limite_caracteres_curso	=	50;
+	let ja_gerou_qrcode = false;
+	document.getElementById("curso").maxLength	=	limite_caracteres_curso;	
+	
+	function	aplicarMascaraDataHora()	{
+	const	dataInput	=	document.getElementById('data_digitada');
+	const	horaInput	=	document.getElementById('hora_digitada');
+	
+	dataInput.addEventListener('input',	()	=>	{
+	let	valor	=	dataInput.value.replace(/\D/g,	'');
+	if	(valor.length	>=	3	&&	valor.length	<=	4)
+	valor	=	valor.slice(0,	2)	+	'/'	+	valor.slice(2);
+	else	if	(valor.length	>	4)
+	valor	=	valor.slice(0,	2)	+	'/'	+	valor.slice(2,	4)	+	'/'	+	valor.slice(4,	8);
+	dataInput.value	=	valor;
+	});
+	
+	horaInput.addEventListener('input',	()	=>	{
+	let	valor	=	horaInput.value.replace(/\D/g,	'');
+	if	(valor.length	>=	3	&&	valor.length	<=	4)
+	valor	=	valor.slice(0,	2)	+	':'	+	valor.slice(2);
+	else	if	(valor.length	>	4)
+	valor	=	valor.slice(0,	2)	+	':'	+	valor.slice(2,	4)	+	':'	+	valor.slice(4,	6);
+	horaInput.value	=	valor;
+	});
+	}
+	
+	
+	
+	function	toBase62(num)	{	//início	da	função	toBase62
+	if	(num	===	0)	return	'0';
+	let	base62	=	'';
+	while	(num	>	0)	{
+	base62	=	base62chars[num	%	62]	+	base62;
+	num	=	Math.floor(num	/	62);
+	}
+	return	base62;
+	}
+	
+	
+	function	completarComEspacos(texto,	tam)	{
+	return	texto.padEnd(tam,	'	');
+	}
+	
+	function	randomize(range)	{
+	return	Math.floor(Math.random()	*	range);
+	}
+	
+	function	toChar(num)	{
+	return	String.fromCharCode(num);
+	}
+	
+	function	CompletarComEspaco(texto,	qtd)	{
+	return	texto.padEnd(qtd,	'	');
+	}
+	function	CompletarComZero_inicio(texto,	qtd)	{
+	return	texto.padStart(qtd,	'0');
+	}	
+	function	CompletarComCaractere(texto,	qtd)	{
+	const	tam_texto	=	texto.length;
+	const	faltam	=	qtd	-	tam_texto;
+	
+	if	(faltam	<	0)	{
+	return	texto;
+	}	else	{
+	let	complemento	=	'';
+	for	(let	i	=	0;	i	<	faltam;	i++)	{
+	const	charCode	=	65	+	randomize(26);	
+	complemento	+=	String.fromCharCode(charCode);	//	Converte	para	caractere
+	}
+	return	texto	+	complemento;
+	}
+	}
+	
+	function	toCharCodesBase62(texto)	{
+	let	resultado	=	'';
+	for	(let	i	=	0;	i	<	texto.length;	i++)	{
+	const	code	=	texto.charCodeAt(i);
+	resultado	+=	toBase62(code).padStart(2,	'0');
+	resultado	+=	toBase62(code	+	1).padStart(2,	'0');
+	}
+	
+	return	resultado;
+	}
+	
+function preencherDataHora(gerar) {
+  const agora = new Date();
+  const dia = String(agora.getDate()).padStart(2, '0');
+  const mes = String(agora.getMonth() + 1).padStart(2, '0');
+  const ano = agora.getFullYear();
+  const horaAtual = String(agora.getHours()).padStart(2, '0');
+  const minuto = String(agora.getMinutes()).padStart(2, '0');
+  const segundo = String(agora.getSeconds()).padStart(2, '0');
+
+  document.getElementById('data_digitada').value = `${dia}/${mes}/${ano}`;
+  document.getElementById('hora_digitada').value = `${horaAtual}:${minuto}:${segundo}`;
+
+  if (gerar === true && ja_gerou_qrcode===true) {
+    const curso = document.getElementById("curso").value.trim();
+    const data = document.getElementById("data_digitada").value.trim();
+    const hora = document.getElementById("hora_digitada").value.trim();
+
+    // Verifica se todos os campos têm algum valor após remover espaços em branco
+    if (curso.length > 0 && data.length > 0 && hora.length > 0) {
+      GerarCodValid();
+    }
+  }
+}
+	function	UpdateDataHora(){
+        const curso = document.getElementById("curso").value.trim(); 
+    	preencherDataHora(!(!curso));
+	}
+	
+	function	displayErrorMessage(message)	{
+	document.getElementById('error-message-container').innerHTML	=	`<div	class="alert	alert-danger	d-flex	align-items-center"	role="alert">
+	<span	class="me-2">⚠️</span>	${message}
+	</div>`;
+	}
+	
+	
+
+        function GerarCodValid() {
+            const curso = document.getElementById("curso").value.trim(); 
+            const data = document.getElementById("data_digitada").value.trim();
+            const hora = document.getElementById("hora_digitada").value.trim();
+            const validacao = document.getElementById("validacao");
+        
+            const dataPattern = /^\d{2}\/\d{2}\/\d{4}$/;
+            const horaPattern = /^\d{2}:\d{2}:\d{2}$/;
+        
+			if (!curso || !data || !hora) {
+				validacao.className = "invalido";
+                // Verifica se todos os campos têm algum valor após remover espaços em branco
+                let info = "";
+                if (curso.length === 0) {
+                  info = "Informe o nome do curso.";
+                }				
+                else if (data.length === 0) {
+                  info = "Informe a data do curso.";
+                }				
+                else if (hora.length === 0) {
+                  info = "Informe a hora do curso.";
+                }				
+				validacao.innerText = "❌ " +  info;
+				abrirModal();
+				return;
+			}
+        
+            if (!dataPattern.test(data)) {
+                displayErrorMessage('Formato de data inválido. Use DD/MM/AAAA.');
+                return;
+            }
+        
+            if (!horaPattern.test(hora)) {
+                displayErrorMessage('Formato de hora inválido. Use HH:MM:SS.');
+                return;
+            }
+        
+            const [dia, mes, ano] = data.split('/').map(Number);
+            const [hh, mm, ss] = hora.split(':').map(Number);
+        
+            const encData = CompletarComZero_inicio(toBase62(ano * 32 * 32 + mes * 32 + dia), 5);
+            const encHora = CompletarComZero_inicio(toBase62(hh * 60 * 60 + mm * 60 + ss), 5);
+        
+            const len_curso = curso.length + 100; // Calcula o comprimento da string curso
+        
+            const string_len_curso = String(len_curso);
+            const cursoBase62 = toCharCodesBase62(CompletarComCaractere(curso, limite_caracteres_curso));
+            //const codigoFinal = `${encData}.${encHora}.${cursoBase62}${alunoBase62}.${string_len_curso}.${string_len_aluno}`;
+            const codigoFinal = `${encData}.${encHora}.${cursoBase62}.${string_len_curso}.${limite_caracteres_curso}`; //só o curso, sem o aluno
+        
+            let site_alvo = "https://advancedsystemsprogrammingia.github.io/iespro-valid-curso-auto/";
+            let conecta = "?id=";
+            let gera_html = site_alvo + conecta + codigoFinal;
+            ja_gerou_qrcode = true;
+            MostrarElemento(false); //função que oculta o campo
+            document.getElementById('clipboard-area').value = gera_html;
+        
+            const qrImage = document.getElementById('qrImage');
+            qrImage.src = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data='
+                + encodeURIComponent(gera_html)
+                + '&color=000001&bgcolor=FFFFFF'; //cor do qrcode para download
+            qrImage.style.display = 'block';
+
+            MostrarElemento(true, "copy_code");
+        
+        }    
+	
+	
+	function	copiarCodigo()	{
+	const	area	=	document.getElementById('clipboard-area');
+	area.select();
+	document.execCommand('copy');
+	
+	const	toastElement	=	document.getElementById('toast-copiado');
+	const	toast	=	new	bootstrap.Toast(toastElement);
+	toast.show();
+	}
+	function	MostrarElemento(exibir,	elementoId)	{
+	const	elemento	=	document.getElementById(elementoId);
+	if	(elemento)	{
+	elemento.style.display	=	exibir	?	"block"	:	"none";
+	}
+	}	
+	
+	//Limpar	mensagem	de	erro	"Informe	o	curso"
+	function	clearErrorMessage(elementoId)	{
+	const	elemento	=	document.getElementById(elementoId);
+	if	(elemento)	{
+	elemento.innerHTML	=	'';
+	}	else	{
+	console.error(`Elemento	com	o	ID	"${elementoId}"	não	encontrado.`);
+	}
+	}	
+	
+function	limparData()	{
+document.getElementById("data_digitada").value	=	"";
+}
+function	limparHora()	{
+document.getElementById("hora_digitada").value	=	"";
+}
+function	abrirModal()	{
+const	modal	=	document.getElementById("myModal");
+modal.style.display	=	"flex";
+}
+function	fecharModal()	{
+const	modal	=	document.getElementById("myModal");
+modal.style.display	=	"none";
+}
+function	exibirCaixaMensagem(mensagem)	{
+const	caixa	=	document.getElementById("caixaMensagem");
+const	texto	=	document.getElementById("mensagemTexto");
+texto.innerText	=	mensagem;
+caixa.style.display	=	"flex";
+}
+function	fecharCaixaMensagem()	{
+const	caixa	=	document.getElementById("caixaMensagem");
+caixa.style.display	=	"none";
+}
+	
+
+        function Colorir_Botao(id_botao, cor) {
+          const botao = document.getElementById(id_botao);
+          if (botao) {
+            botao.style.backgroundColor = cor;
+          } else {
+            console.error(`Botão com o ID "${id_botao}" não encontrado.`);
+          }
+        }        
+        
+        window.onload = function () {
+        	preencherDataHora(false);
+        	MostrarElemento(false, "error-message-container");
+            MostrarElemento(false, "codigo-validacao");
+            MostrarElemento(false, "copy_code");
+            clearErrorMessage("codigo-validacao");
+            clearErrorMessage("error-message-container");
+        	aplicarMascaraDataHora();
+            let cor = "#8a6e69";
+            Colorir_Botao("limparDataBtn", cor);
+            Colorir_Botao("limparHoraBtn", cor);
+        	 
+            };
+	</script>
+</body>
+</html>
